@@ -1,8 +1,11 @@
 package org.brohede.marcus.fragmentsapp;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
@@ -47,6 +50,9 @@ public class MainActivity extends FragmentActivity implements MountainDetailsFra
     private static final String[] mountainNames = {"Matterhorn","Mont Blanc","Denali"};
     private static final String[] mountainLocations = {"Alps","Alps","Alaska"};
     private static final int[] mountainHeights ={4478,4808,6190};
+    private RecyclerView mRecyclerView;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
 
     @Override
     public void onListFragmentInteraction(Mountain m) {
@@ -150,7 +156,7 @@ public class MainActivity extends FragmentActivity implements MountainDetailsFra
             super.onPostExecute(o);
             try {
                 JSONArray json1 = new JSONArray(o);
-                //adapter.clear();
+                mountains.clear();
                 for (int i = 0; i < json1.length(); i++) {
                     JSONObject berg = json1.getJSONObject(i);
                     String bergNamn = berg.getString("name");
@@ -166,7 +172,22 @@ public class MainActivity extends FragmentActivity implements MountainDetailsFra
                     //String bergUrl = bergAux.getString("url");
 
                     Mountain m = new Mountain(bergNamn, bergPlats,bergSize);
-                    adapter.add(m);
+                    mountains.add(m);
+                    Log.d("data", "V" + mountains);
+
+                    //RecyclerView
+                    mRecyclerView = (RecyclerView) findViewById(R.id.my_list);
+                    mRecyclerView.setHasFixedSize(true);
+                    mLayoutManager = new LinearLayoutManager(this);
+                    mRecyclerView.setLayoutManager(mLayoutManager);
+
+                    mAdapter = new MyMountainRecyclerViewAdapter(mountains, new MyMountainRecyclerViewAdapter {
+                        @Override public void onItemClick(Mountain item) {
+                            Toast.makeText(getApplicationContext(),"hej",Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+                    mRecyclerView.setAdapter(mAdapter);
                 }
             } catch (JSONException e) {
                 Log.e("brom", "E:" + e.getMessage());
